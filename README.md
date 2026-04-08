@@ -9,6 +9,7 @@ A gesture-controlled game running on the **Raspberry Pi RP2350**. Players contro
 | Microcontroller | Raspberry Pi RP2350 |
 | Gesture Sensor | APDS-9960 |
 | Display | LCD (SPI) |
+| Speaker | PWM |
 
 ## How It Works
 
