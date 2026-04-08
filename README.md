@@ -25,29 +25,5 @@ src/
 └── main.c          — game loop
 ```
 
-## Building
-
-Requires the [Raspberry Pi Pico SDK](https://github.com/raspberrypi/pico-sdk).
-
-```bash
-mkdir build && cd build
-cmake ..
-make
-```
-
-Flash the resulting `.uf2` file to the RP2350 by holding BOOTSEL while connecting USB.
-
-## Wiring
-
-| APDS-9960 | RP2350 |
-|---|---|
-| VCC | 3.3V |
-| GND | GND |
-| SDA | GP4 |
-| SCL | GP5 |
-
-> **Note:** The APDS-9960 is 3.3V only. Do not connect to 5V.
-
-## Team
 
 ECE 362 — Purdue University
