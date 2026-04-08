@@ -1,0 +1,31 @@
+Pinout
+
+APDS-9960
+
+Vin = 3.3V
+3Vo = Null
+Gnd = Ground
+SCl = GPIO Pin 5
+SDA = GPIO Pin 4
+INT = GPIO Pin 6
+
+SPI TFT LCD
+
+1 
+VCC = 3.3V
+2
+GND = Ground
+3 
+CS = GPIO Pin 17
+4
+RESET = GPIO Pin 21
+5
+DC/RS = GPIO Pin 20
+6
+SDI/MOSI = GPIO Pin 19
+7
+SCK = GPIO Pin 18
+8
+LED = 3.3V
+9
+SDO/MISO = GPIO Pin 16
