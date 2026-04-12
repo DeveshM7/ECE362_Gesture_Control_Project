@@ -21,7 +21,6 @@ The APDS-9960 uses an IR LED and four directional photodiodes to detect hand swi
 src/
 ├── apds9960.c/h    — APDS-9960 sensor driver
 ├── gesture.c/h     — gesture reading logic
-├── i2c_hal.c/h     — I2C hardware abstraction (Pico SDK)
 ├── lcd.c/h         — LCD display driver
 └── main.c          — game loop
 ```
