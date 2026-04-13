@@ -129,11 +129,11 @@ const char *read_gesture(void) {
         int abs_ud = ud < 0 ? -ud : ud;
         int abs_lr = lr < 0 ? -lr : lr;
         if (abs_ud > abs_lr) {
-            if (ud >  100) return "UP";
-            if (ud < -100) return "DOWN";
+            if (ud >  100) return "DOWN";
+            if (ud < -100) return "UP";
         } else {
-            if (lr >  100) return "LEFT";
-            if (lr < -100) return "RIGHT";
+            if (lr >  100) return "RIGHT";
+            if (lr < -100) return "LEFT";
         }
     }
 
