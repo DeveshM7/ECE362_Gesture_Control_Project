@@ -15,6 +15,7 @@
 #define PADDING                3
 #define SCROLL_STEP            10
 
+// --- pin definitions --
 #define PIN_SDI    19
 #define PIN_CS     17
 #define PIN_SCK    18
@@ -38,7 +39,9 @@ typedef struct {
 extern ObstacleRow rows[MAX_ROWS];
 
 // --- function declarations ---
+void init_spi_lcd();
 void generate_row();
 void move_rows_down();
+void show_highscore(int highscore);
 
 #endif

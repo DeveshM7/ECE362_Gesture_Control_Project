@@ -28,7 +28,6 @@ void init_spi_lcd() {
     spi_set_format(spi0, 8, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
 }
 
-
 void generate_row()
 {
     for (int i = 0; i < MAX_ROWS; i++) 
