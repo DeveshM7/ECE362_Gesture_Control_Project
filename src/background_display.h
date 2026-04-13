@@ -15,6 +15,12 @@
 #define PADDING                3
 #define SCROLL_STEP            10
 
+#define PIN_SDI    19
+#define PIN_CS     17
+#define PIN_SCK    18
+#define PIN_DC     20
+#define PIN_nRESET 21
+
 // --- structs ---
 typedef struct {
     u16 x;

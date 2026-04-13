@@ -8,6 +8,27 @@
 
 ObstacleRow rows[MAX_ROWS];
 
+void init_spi_lcd() {
+    gpio_set_function(PIN_CS, GPIO_FUNC_SIO);
+    gpio_set_function(PIN_DC, GPIO_FUNC_SIO);
+    gpio_set_function(PIN_nRESET, GPIO_FUNC_SIO);
+
+    gpio_set_dir(PIN_CS, GPIO_OUT);
+    gpio_set_dir(PIN_DC, GPIO_OUT);
+    gpio_set_dir(PIN_nRESET, GPIO_OUT);
+
+    gpio_put(PIN_CS, 1); // CS high
+    gpio_put(PIN_DC, 0); // DC low
+    gpio_put(PIN_nRESET, 1); // nRESET high
+
+    // initialize SPI0 with 48 MHz clock
+    gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
+    gpio_set_function(PIN_SDI, GPIO_FUNC_SPI);
+    spi_init(spi0, 100 * 1000 * 1000);
+    spi_set_format(spi0, 8, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
+}
+
+
 void generate_row()
 {
     for (int i = 0; i < MAX_ROWS; i++) 
