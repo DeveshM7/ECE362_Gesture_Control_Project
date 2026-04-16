@@ -8,6 +8,12 @@
 
 ObstacleRow rows[MAX_ROWS];
 
+void gpio_callback(uint gpio, uint32_t events);
+
+// ------------------------------------------------------------
+//  SPI LCD initialization and button setup
+// ------------------------------------------------------------
+
 void init_spi_lcd() {
     gpio_set_function(PIN_CS, GPIO_FUNC_SIO);
     gpio_set_function(PIN_DC, GPIO_FUNC_SIO);
@@ -27,6 +33,66 @@ void init_spi_lcd() {
     spi_init(spi0, 100 * 1000 * 1000);
     spi_set_format(spi0, 8, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
 }
+
+void init_buttons()
+{
+    gpio_set_function(PIN_PLAY, GPIO_FUNC_SIO);
+    gpio_set_function(PIN_PAUSE, GPIO_FUNC_SIO);
+
+    gpio_set_dir(PIN_PLAY, GPIO_IN);
+    gpio_set_dir(PIN_PAUSE, GPIO_IN);
+
+    gpio_pull_down(PIN_PLAY);
+    gpio_pull_down(PIN_PAUSE);
+
+    gpio_set_irq_enabled_with_callback(PIN_PLAY, GPIO_IRQ_EDGE_RISE, true, &gpio_callback);
+    gpio_set_irq_enabled(PIN_PAUSE, GPIO_IRQ_EDGE_RISE, true);
+}
+
+// ------------------------------------------------------------
+//  Interrupt setup
+// ------------------------------------------------------------
+
+void gpio_callback(uint gpio, uint32_t event_mask)
+{
+    static uint32_t last_interrupt_time = 0;
+    uint32_t now = to_ms_since_boot(get_absolute_time());
+
+    if (now - last_interrupt_time < 250) { // Slightly longer debounce
+        gpio_acknowledge_irq(gpio, event_mask);
+        return;
+    }
+    last_interrupt_time = now;
+    
+    gpio_acknowledge_irq(gpio, event_mask); // Acknowledge the interrupt
+    
+    if (gpio == PIN_PLAY) {
+        // Handle play button press
+        if (current_state == STATE_MAIN_MENU || current_state == STATE_GAME_OVER || current_state == STATE_PAUSED)
+        {
+            // In main menu or game over, start game on play button press
+            current_state = STATE_PLAYING;
+        }
+
+    }
+    else if (gpio == PIN_PAUSE) {
+        // Handle pause button press
+        if (current_state == STATE_PLAYING) {
+            // In playing state, pause game on pause button press
+            current_state = STATE_PAUSED;
+        }
+        else if (current_state == STATE_PAUSED || current_state == STATE_GAME_OVER) {
+            // In paused state or game over, return to main menu on pause button press
+            current_state = STATE_MAIN_MENU;;
+        }
+    }
+}
+
+// ------------------------------------------------------------
+//  Game display functions
+// ------------------------------------------------------------
+
+// --- obstacle generation and movement ---
 
 void generate_row()
 {
@@ -102,6 +168,16 @@ void move_rows_down()
     }
 
     // 3. Redraw all active rows at new position
+    redraw_rows();
+
+    // Debug:
+    // for (int i = 0; i < MAX_ROWS; i++)
+    //     printf("row %d: active=%d y=%d\n", i, rows[i].active, rows[i].y);
+    // printf("---\n");
+}
+
+void redraw_rows()
+{
     for (int i = 0; i < MAX_ROWS; i++)
     {
         if (rows[i].active && rows[i].y >= 0)
@@ -121,16 +197,77 @@ void move_rows_down()
             }
         }
     }
-
-    // Debug:
-    // for (int i = 0; i < MAX_ROWS; i++)
-    //     printf("row %d: active=%d y=%d\n", i, rows[i].active, rows[i].y);
-    // printf("---\n");
 }
 
-void show_highscore(int highscore)
+// --- score and menu displays ---
+
+void show_score(int score)
 {    
     char buffer[20];
+    sprintf(buffer, "Score: %05d", score);
+    LCD_DrawString(1, 0, BLACK, WHITE, buffer, 12, 0);
+}
+
+void main_menu_display(int highscore)
+{
+    LCD_Clear(WHITE);
+    LCD_DrawString(80, 120, BLACK, WHITE, "Welcome to", 16, 0);
+    LCD_DrawString(75, 140, BLACK, WHITE, "Crossy Road", 16, 0);
+    LCD_DrawString(40, 200, BLACK, WHITE, "Press Button to Start", 16, 0);
+    
+    char buffer[20];
     sprintf(buffer, "High Score: %05d", highscore);
-    LCD_DrawString(0, 0, BLACK, WHITE, buffer, 12, 0);
+    LCD_DrawString(55, 295, BLACK, WHITE, buffer, 16, 0);
+}
+
+void play_game_display()
+{   
+    show_score(curr_score);
+    uint32_t last_spawn = time_us_32();
+    uint32_t last_scroll = time_us_32();
+
+    while(current_state == STATE_PLAYING)
+    {
+        uint32_t now = time_us_32();
+
+        if (now - last_spawn >= 14500000)
+        {
+            generate_row();
+            last_spawn = now;
+        }
+
+        if (now - last_scroll >= 750000)
+        {
+            move_rows_down();
+            last_scroll = now;
+            curr_score++;
+            show_score(curr_score);
+        }
+        sleep_ms(1);
+    }
+}
+
+void game_over_display(int final_score)
+{
+    LCD_Clear(WHITE);
+    
+    char buffer[64];
+    sprintf(buffer, "Score: %05d", final_score);
+    LCD_DrawString(80, 120, BLACK, WHITE, "Game Over!", 16, 0);
+    LCD_DrawString(73, 140, BLACK, WHITE, buffer, 16, 0);
+    LCD_DrawString(77, 190, BLACK, WHITE, "Play Again?", 16, 0);
+    LCD_DrawString(82, 210, BLACK, WHITE, "Main Menu", 16, 0);
+    
+    if (final_score > highscore)
+    {
+        highscore = final_score;
+    }
+}
+
+void pause_game_display()
+{
+    LCD_DrawFillRectangle(65, 120, 175, 205, WHITE); // Clear area for pause menu
+    LCD_DrawString(75, 130, BLACK, WHITE, "Game Paused", 16, 0);
+    LCD_DrawString(105, 165, BLACK, WHITE, "Play", 16, 0);
+    LCD_DrawString(85, 185, BLACK, WHITE, "Main Menu", 16, 0);
 }

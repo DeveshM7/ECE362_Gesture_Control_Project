@@ -13,14 +13,16 @@
 #define N_COLS                 6
 #define COL_W                  (LCD_W / N_COLS)
 #define PADDING                3
-#define SCROLL_STEP            10
+#define SCROLL_STEP            5
 
-// --- pin definitions --
+// --- pin definitions ---
 #define PIN_SDI    19
 #define PIN_CS     17
 #define PIN_SCK    18
 #define PIN_DC     20
-#define PIN_nRESET 21
+#define PIN_nRESET 22
+#define PIN_PAUSE  21
+#define PIN_PLAY   26
 
 // --- structs ---
 typedef struct {
@@ -35,13 +37,30 @@ typedef struct {
     bool active;
 } ObstacleRow;
 
+typedef enum {
+    STATE_MAIN_MENU,
+    STATE_PLAYING,
+    STATE_PAUSED,
+    STATE_GAME_OVER
+} GameState;
+
 // --- globals ---
 extern ObstacleRow rows[MAX_ROWS];
+extern volatile GameState current_state;
+extern int highscore;
+extern int curr_score;
 
 // --- function declarations ---
 void init_spi_lcd();
+void init_buttons();
+void gpio_callback(uint gpio, uint32_t events);
 void generate_row();
 void move_rows_down();
-void show_highscore(int highscore);
+void redraw_rows();
+void show_score(int score);
+void main_menu_display(int highscore);
+void play_game_display();
+void game_over_display(int final_score);
+void pause_game_display();
 
 #endif
