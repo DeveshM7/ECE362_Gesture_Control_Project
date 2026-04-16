@@ -14,6 +14,11 @@
 #define DIR_LEFT  3
 #define DIR_RIGHT 4
 
+// -- globals --
+int highscore = 0;
+int curr_score = 0;
+volatile GameState current_state = STATE_MAIN_MENU;
+
 static uint32_t gesture_to_int(const char *g) {
     if (g[0] == 'U') return DIR_UP;
     if (g[0] == 'D') return DIR_DOWN;
