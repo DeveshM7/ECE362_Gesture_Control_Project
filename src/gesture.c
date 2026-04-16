@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "pico/stdlib.h"
+#include "pico/multicore.h"
 #include "hardware/i2c.h"
 #include "gesture.h"
 
@@ -138,4 +139,25 @@ const char *read_gesture(void) {
     }
 
     return NULL;
+}
+
+// ── Core 1 entry point ────────────────────────────────────────
+static uint32_t gesture_to_int(const char *g) {
+    if (g[0] == 'U') return DIR_UP;
+    if (g[0] == 'D') return DIR_DOWN;
+    if (g[0] == 'L') return DIR_LEFT;
+    if (g[0] == 'R') return DIR_RIGHT;
+    return 0;
+}
+
+void core1_entry(void) {
+    sleep_ms(100);  // let core 0 finish startup prints first
+    printf("[INFO]  Gesture loop running on core %d\n", get_core_num());
+    while (1) {
+        const char *g = read_gesture();
+        if (g) {
+            multicore_fifo_push_blocking(gesture_to_int(g));
+        }
+        sleep_ms(30);
+    }
 }

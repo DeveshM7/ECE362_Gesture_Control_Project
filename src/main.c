@@ -14,11 +14,6 @@
 #define DIR_LEFT  3
 #define DIR_RIGHT 4
 
-// -- Globals for game function --
-int highscore = 0;
-int curr_score = 0;
-volatile GameState current_state = STATE_MAIN_MENU;
-
 static uint32_t gesture_to_int(const char *g) {
     if (g[0] == 'U') return DIR_UP;
     if (g[0] == 'D') return DIR_DOWN;
@@ -45,10 +40,6 @@ int main(void) {
     stdio_init_all();
     sleep_ms(2000);  // wait for USB serial to connect
 
-    printf("\n====================================\n");
-    printf("  APDS-9960 Dual-Core Test — RP2350\n");
-    printf("====================================\n\n");
-
     if (!apds_init()) {
         printf("[FAIL]  Sensor init failed. Halting.\n");
         while (1) tight_loop_contents();
@@ -69,7 +60,6 @@ int main(void) {
     GameState last_state = -1;
 
     while (1) {
-        // Check if core 1 has detected a gesture
         if (multicore_fifo_rvalid()) {
             uint32_t dir = multicore_fifo_pop_blocking();
             switch (dir) {
