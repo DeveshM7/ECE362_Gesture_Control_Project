@@ -86,6 +86,10 @@ void gpio_callback(uint gpio, uint32_t event_mask)
 
 // --- obstacle generation and movement ---
 
+int scroll_step = 5; // Global variable for scroll step, can be adjusted for difficulty
+int spawn_rate = 14500000; // Microseconds between spawns, can be adjusted for difficulty
+int scroll_rate = 750000; // Microseconds between scrolls, can be adjusted for difficulty
+
 void generate_row()
 {
     for (int i = 0; i < MAX_ROWS; i++) 
@@ -152,7 +156,7 @@ void move_rows_down()
     {
         if (rows[i].active)
         {
-            rows[i].y += SCROLL_STEP;
+            rows[i].y += scroll_step;
             // If row has moved off bottom of screen, mark as inactive
             if (rows[i].y >= LCD_H)
                 rows[i].active = false;
@@ -239,26 +243,33 @@ void play_game_display() {
         last_scroll = now;
     }
 
-    if (now - last_spawn >= 14500000) {
+    if (now - last_spawn >= spawn_rate) {
         generate_row();
         last_spawn = now;
     }
 
-    if (now - last_scroll >= 750000) {
+    if (now - last_scroll >= scroll_rate) {
         move_rows_down();
         last_scroll = now;
         curr_score++;
+        // Difficulty scaling
+        if (curr_score % 10 == 0)
+        {
+            scroll_step = scroll_step + (scroll_step / 10);
+            spawn_rate = spawn_rate - (spawn_rate / 10);
+            scroll_rate = scroll_rate - (scroll_rate / 10);
+        }
         show_score(curr_score);
     }
 }
 
 void game_over_display(int final_score)
 {
-    LCD_Clear(WHITE);
+    LCD_DrawFillRectangle(50, 100, 190, 230, WHITE); // Clear area for game over display
     
     char buffer[64];
     sprintf(buffer, "Score: %05d", final_score);
-    LCD_DrawString(80, 120, BLACK, WHITE, "Game Over!", 16, 0);
+    LCD_DrawString(80, 120, RED, WHITE, "Game Over!", 16, 0);
     LCD_DrawString(73, 140, BLACK, WHITE, buffer, 16, 0);
     LCD_DrawString(77, 190, BLACK, WHITE, "Play Again?", 16, 0);
     LCD_DrawString(82, 210, BLACK, WHITE, "Main Menu", 16, 0);

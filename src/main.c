@@ -58,6 +58,9 @@ void start_game_logic() {
     LCD_Clear(WHITE); 
     generate_row();
     redraw_rows();
+    scroll_step = 5; // Global variable for scroll step, can be adjusted for difficulty
+    spawn_rate = 14500000; // Microseconds between spawns, can be adjusted for difficulty
+    scroll_rate = 750000; // Microseconds between scrolls, can be adjusted for difficulty
 }
 
 void draw_player() {

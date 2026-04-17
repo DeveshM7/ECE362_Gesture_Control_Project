@@ -14,7 +14,6 @@
 #define N_COLS                 6
 #define COL_W                  (LCD_W / N_COLS)
 #define PADDING                3
-#define SCROLL_STEP            5
 
 // --- pin definitions ---
 #define PIN_SDI    19
@@ -50,6 +49,9 @@ extern ObstacleRow rows[MAX_ROWS];
 extern volatile GameState current_state;
 extern int highscore;
 extern int curr_score;
+extern int scroll_step;
+extern int spawn_rate;
+extern int scroll_rate;
 
 // --- function declarations ---
 void init_spi_lcd();
