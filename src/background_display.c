@@ -55,35 +55,27 @@ void init_buttons()
 
 void gpio_callback(uint gpio, uint32_t event_mask)
 {
-    static uint32_t last_interrupt_time = 0;
+    gpio_acknowledge_irq(gpio, event_mask); // Acknowledge interrupt
+
+    static uint32_t last_interrupt_time = 0; // Only update time on successful state change
     uint32_t now = to_ms_since_boot(get_absolute_time());
 
     if (now - last_interrupt_time < 250) { // Slightly longer debounce
-        gpio_acknowledge_irq(gpio, event_mask);
         return;
     }
-    last_interrupt_time = now;
     
-    gpio_acknowledge_irq(gpio, event_mask); // Acknowledge the interrupt
-    
-    if (gpio == PIN_PLAY) {
-        // Handle play button press
-        if (current_state == STATE_MAIN_MENU || current_state == STATE_GAME_OVER || current_state == STATE_PAUSED)
-        {
-            // In main menu or game over, start game on play button press
+    if (gpio == PIN_PLAY) { // Handle play button press
+        if (current_state != STATE_PLAYING) { // Start game
             current_state = STATE_PLAYING;
+            last_interrupt_time = now;
         }
-
-    }
-    else if (gpio == PIN_PAUSE) {
-        // Handle pause button press
-        if (current_state == STATE_PLAYING) {
-            // In playing state, pause game on pause button press
+    } else if (gpio == PIN_PAUSE) { // Handle pause button press
+        if (current_state == STATE_PLAYING) { // Pause game
             current_state = STATE_PAUSED;
-        }
-        else if (current_state == STATE_PAUSED || current_state == STATE_GAME_OVER) {
-            // In paused state or game over, return to main menu on pause button press
-            current_state = STATE_MAIN_MENU;;
+            last_interrupt_time = now;
+        } else { // Return to main menu
+            current_state = STATE_MAIN_MENU;
+            last_interrupt_time = now;
         }
     }
 }
@@ -220,30 +212,43 @@ void main_menu_display(int highscore)
     LCD_DrawString(55, 295, BLACK, WHITE, buffer, 16, 0);
 }
 
-void play_game_display()
-{   
+// Static variables preserve values between function calls
+static uint32_t last_spawn = 0;
+static uint32_t last_scroll = 0;
+static bool was_paused = false;
+
+void play_game_display() {   
+    uint32_t now = time_us_32();
     show_score(curr_score);
-    uint32_t last_spawn = time_us_32();
-    uint32_t last_scroll = time_us_32();
 
-    while(current_state == STATE_PLAYING)
-    {
-        uint32_t now = time_us_32();
+    if (current_state != STATE_PLAYING) {
+        last_spawn = now;
+        last_scroll = now;
+        was_paused = true; // Set flag
+        return;
+    }
 
-        if (now - last_spawn >= 14500000)
-        {
-            generate_row();
-            last_spawn = now;
-        }
+    if (was_paused) {
+        last_spawn = now;
+        last_scroll = now;
+        was_paused = false; // Reset flag
+    }
 
-        if (now - last_scroll >= 750000)
-        {
-            move_rows_down();
-            last_scroll = now;
-            curr_score++;
-            show_score(curr_score);
-        }
-        sleep_ms(1);
+    if (last_spawn == 0) { // Initialize timers on first run
+        last_spawn = now;
+        last_scroll = now;
+    }
+
+    if (now - last_spawn >= 14500000) {
+        generate_row();
+        last_spawn = now;
+    }
+
+    if (now - last_scroll >= 750000) {
+        move_rows_down();
+        last_scroll = now;
+        curr_score++;
+        show_score(curr_score);
     }
 }
 

@@ -149,15 +149,3 @@ static uint32_t gesture_to_int(const char *g) {
     if (g[0] == 'R') return DIR_RIGHT;
     return 0;
 }
-
-void core1_entry(void) {
-    sleep_ms(100);  // let core 0 finish startup prints first
-    printf("[INFO]  Gesture loop running on core %d\n", get_core_num());
-    while (1) {
-        const char *g = read_gesture();
-        if (g) {
-            multicore_fifo_push_blocking(gesture_to_int(g));
-        }
-        sleep_ms(30);
-    }
-}

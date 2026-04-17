@@ -18,7 +18,7 @@ GND = Ground
 3 
 CS = GPIO Pin 17
 4
-RESET = GPIO Pin 21
+RESET = GPIO Pin 22
 5
 DC/RS = GPIO Pin 20
 6
