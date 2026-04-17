@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "game_display.h"
+#include "collision.h"
 
 // ── Direction codes (passed through inter-core FIFO) ──────────
 #define DIR_UP    1
@@ -51,6 +52,8 @@ void core1_entry(void) {
 
 void start_game_logic() {
     curr_score = 0;
+    player_x = 120;
+    player_y = 310;
     for (int i = 0; i < MAX_ROWS; i++) {
         rows[i].active = false;
     }
@@ -125,8 +128,9 @@ int main(void) {
             }
 
             if (current_state == STATE_PLAYING) {
-                move_character(dir); // Move coordinates (update internal variables)
-                draw_player(); // Immediately draw update to LCD
+                move_character(dir);
+                draw_player();
+                if (check_collision()) current_state = STATE_GAME_OVER;
             }
         }
 
@@ -162,6 +166,7 @@ int main(void) {
         if (current_state == STATE_PLAYING && last_state == STATE_PLAYING) {
             play_game_display();
             draw_player();
+            if (check_collision()) current_state = STATE_GAME_OVER;
         }
     }
 }
