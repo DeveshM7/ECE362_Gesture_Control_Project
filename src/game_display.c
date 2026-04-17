@@ -253,7 +253,7 @@ void play_game_display() {
         last_scroll = now;
         curr_score++;
         // Difficulty scaling
-        if (curr_score % 10 == 0)
+        if (curr_score % 100 == 0)
         {
             scroll_step = scroll_step + (scroll_step / 10);
             spawn_rate = spawn_rate - (spawn_rate / 10);
