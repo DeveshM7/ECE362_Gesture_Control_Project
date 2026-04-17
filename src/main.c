@@ -6,7 +6,7 @@
 #include "lcd.h"
 #include <stdio.h>
 #include <string.h>
-#include "background_display.h"
+#include "game_display.h"
 
 // ── Direction codes (passed through inter-core FIFO) ──────────
 #define DIR_UP    1

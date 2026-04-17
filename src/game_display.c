@@ -1,10 +1,10 @@
-// background_display.c
+// game_display.c
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
 #include <stdio.h>
 #include <stdint.h>
 #include "lcd.h"
-#include "background_display.h"
+#include "game_display.h"
 
 ObstacleRow rows[MAX_ROWS];
 

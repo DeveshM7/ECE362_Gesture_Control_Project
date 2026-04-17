@@ -1,9 +1,10 @@
-// background_display.h
-#ifndef BACKGROUND_DISPLAY_H
-#define BACKGROUND_DISPLAY_H
+// game_display.h
+#ifndef GAME_DISPLAY_H
+#define GAME_DISPLAY_H
 
 #include "lcd.h"
 #include <stdbool.h>
+#include "pico/stdlib.h"
 
 // --- defines ---
 #define MAX_OBSTACLES_PER_ROW  6
