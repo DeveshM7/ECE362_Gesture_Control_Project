@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "lcd.h"
 #include "game_display.h"
+#include "sound.h"
 
 ObstacleRow rows[MAX_ROWS];
 
@@ -250,10 +251,11 @@ void play_game_display() {
 
     if (now - last_scroll >= scroll_rate) {
         move_rows_down();
+        sound_play_tick();
         last_scroll = now;
         curr_score++;
         // Difficulty scaling
-        if (curr_score % 10 == 0)
+        if (curr_score % 30 == 0)
         {
             scroll_step = scroll_step + (scroll_step / 10);
             spawn_rate = spawn_rate - (spawn_rate / 10);
