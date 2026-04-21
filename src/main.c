@@ -8,6 +8,7 @@
 #include <string.h>
 #include "game_display.h"
 #include "collision.h"
+#include "sound.h"
 
 // ── Direction codes (passed through inter-core FIFO) ──────────
 #define DIR_UP    1
@@ -111,6 +112,7 @@ int main(void) {
     init_buttons();
     LCD_Setup();
     LCD_Clear(WHITE);
+    sound_init();
 
     srand(time_us_32());
 
@@ -143,11 +145,12 @@ int main(void) {
 
                 case STATE_PLAYING:
                     if (last_state == STATE_PAUSED) {
-                        LCD_Clear(WHITE); // Redraw rows and score after clearing
+                        LCD_Clear(WHITE);
                         redraw_rows();
                         show_score(curr_score);
                     } else { // Fresh start
                         start_game_logic();
+                        sound_play_start();
                     }
                     break;
 
@@ -156,6 +159,7 @@ int main(void) {
                     break;
 
                 case STATE_GAME_OVER:
+                    sound_play_death();
                     game_over_display(curr_score);
                     break;
             }
