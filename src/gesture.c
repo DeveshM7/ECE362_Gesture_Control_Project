@@ -122,8 +122,8 @@ const char *read_gesture(void) {
         int ud = up - down;
         int lr = left - right;
 
-        //printf("  [raw] U=%-4d D=%-4d L=%-4d R=%-4d  ud=%d lr=%d\n",
-               //up, down, left, right, ud, lr);
+        printf("  [raw] U=%-4d D=%-4d L=%-4d R=%-4d  ud=%d lr=%d\n",
+               up, down, left, right, ud, lr);
 
         up = down = left = right = 0;  // reset for next gesture
 
