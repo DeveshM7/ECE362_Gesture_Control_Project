@@ -12,6 +12,7 @@
 #include "sound.h"
 #include "ff.h"
 #include "hardware/uart.h"
+#include "leaderboard.h"
 
 // UART function declarations (since no uart.h)
 extern void init_uart(void);
@@ -19,9 +20,6 @@ extern void init_uart_irq(void);
 extern void command_shell(void);
 extern void init_sdcard_io(void);
 extern void set_fattime(int year, int month, int day, int hour, int min, int sec);
-
-// File/leaderboard function declarations
-extern FRESULT leaderboard_submit_score(int score, bool *made_top10);
 
 // ── Direction codes (passed through inter-core FIFO) ──────────
 
