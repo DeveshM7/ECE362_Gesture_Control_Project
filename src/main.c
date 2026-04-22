@@ -12,7 +12,6 @@
 #include "sound.h"
 #include "ff.h"
 #include "hardware/uart.h"
-#include "leaderboard.h"
 
 // UART function declarations (since no uart.h)
 extern void init_uart(void);
