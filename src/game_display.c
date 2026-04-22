@@ -13,6 +13,7 @@
 
 ObstacleRow rows[MAX_ROWS];
 
+
 void gpio_callback(uint gpio, uint32_t events);
 
 // ------------------------------------------------------------
@@ -220,19 +221,15 @@ void main_menu_display(int highscore)
 
     char buffer1[60];
     char buffer2[60];
-    // if (leaderboard_count > 0) { 
-    //     for (int i = 0; i < leaderboard_count; i++) {
-    //         sprintf(buffer, "%d. %s - %d", i + 1, leaderboard[i].username, leaderboard[i].score);
-    //         LCD_DrawString(100, 200 + i * 20, BLACK, WHITE, buffer, 12, 0);
-    //     }
-    // }
 
-    // Test
-    sprintf(buffer1, "Andrea -- 12345");
-    sprintf(buffer2, "Bob -- 67890");
-    LCD_DrawString(100, 200, BLACK, WHITE, buffer1, 12, 0);
-    LCD_DrawString(100, 220, BLACK, WHITE, buffer2, 12, 0);
-
+    if (leaderboard_count > 0) { 
+        for (int i = 0; i < leaderboard_count; i++) {
+            sprintf(buffer1, "%d", leaderboard[i].username);
+            sprintf(buffer2, "-- %5d", i + 1, leaderboard[i].score);
+            LCD_DrawString(60, 128 + i * 30, BLACK, WHITE, buffer1, 16, 0);
+            LCD_DrawString(145, 128 + i * 30, BLACK, WHITE, buffer2, 16, 0);
+        }
+    }
 }
 
 // Static variables preserve values between function calls

@@ -5,19 +5,13 @@
 #include <ctype.h>
 #include "ff.h"
 #include "diskio.h"
+#include "file.h"
 
 #define LEADERBOARD_FILE   "0:/scores.csv"
-#define MAX_ENTRIES        10
-#define MAX_USERNAME_LEN   20
 #define LINE_BUF_LEN       128
 
-typedef struct {
-    char username[MAX_USERNAME_LEN + 1];
-    int score;
-} ScoreEntry;
-
-static ScoreEntry leaderboard[MAX_ENTRIES];
-static int leaderboard_count = 0;
+ScoreEntry leaderboard[MAX_ENTRIES];
+int leaderboard_count = 0;
 
 static void trim_newline(char *s) {
     if (s == NULL) {
