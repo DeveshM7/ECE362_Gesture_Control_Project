@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
 #include "gesture.h"
@@ -9,6 +10,20 @@
 #include "game_display.h"
 #include "collision.h"
 #include "sound.h"
+#include "ff.h"
+#include "hardware/uart.h"
+
+// UART function declarations (since no uart.h)
+extern void init_uart(void);
+extern void init_uart_irq(void);
+extern void command_shell(void);
+extern void init_sdcard_io(void);
+extern void set_fattime(int year, int month, int day, int hour, int min, int sec);
+
+// File/leaderboard function declarations
+extern FRESULT leaderboard_submit_score(int score, bool *made_top10);
+
+// ── Direction codes (passed through inter-core FIFO) ──────────
 
 // ── Direction codes (passed through inter-core FIFO) ──────────
 #define DIR_UP    1
@@ -97,6 +112,16 @@ void move_character(uint32_t dir) {
 int main(void) {
     stdio_init_all();
     sleep_ms(2000);  // wait for USB serial to connect
+    init_uart(); 
+    init_uart_irq();
+    sleep_ms(250);
+
+    while (uart_is_readable(uart0)) {
+        uart_getc(uart0);
+    }
+    set_fattime(2026, 4, 17, 12, 0, 0);
+    init_sdcard_io();
+    command_shell();
 
     if (!apds_init()) {
         printf("[FAIL]  Sensor init failed. Halting.\n");
