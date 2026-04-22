@@ -6,6 +6,9 @@
 #include "lcd.h"
 #include "game_display.h"
 #include "sound.h"
+#include "main_menu.h"
+#include "game_paused.h"
+#include "game_over.h"
 
 ObstacleRow rows[MAX_ROWS];
 
@@ -208,13 +211,18 @@ void show_score(int score)
 void main_menu_display(int highscore)
 {
     LCD_Clear(WHITE);
-    LCD_DrawString(80, 120, BLACK, WHITE, "Welcome to", 16, 0);
-    LCD_DrawString(75, 140, BLACK, WHITE, "Crossy Road", 16, 0);
-    LCD_DrawString(40, 200, BLACK, WHITE, "Press Button to Start", 16, 0);
+    Picture pic;
+    pic.width = 240;
+    pic.height = 320;
+    pic.pixel_data = (unsigned char*)main_menu_map; // This is the array from main_menu.c
+    LCD_DrawPicture(0, 0, &pic);
+    // LCD_DrawString(80, 120, BLACK, WHITE, "Welcome to", 16, 0);
+    // LCD_DrawString(75, 140, BLACK, WHITE, "Crossy Road", 16, 0);
+    // LCD_DrawString(40, 200, BLACK, WHITE, "Press Button to Start", 16, 0);
     
     char buffer[20];
-    sprintf(buffer, "High Score: %05d", highscore);
-    LCD_DrawString(55, 295, BLACK, WHITE, buffer, 16, 0);
+    sprintf(buffer, "%05d", highscore);
+    LCD_DrawString(135, 297, BLACK, WHITE, buffer, 16, 0);
 }
 
 // Static variables preserve values between function calls
@@ -270,11 +278,16 @@ void game_over_display(int final_score)
     LCD_DrawFillRectangle(50, 100, 190, 230, WHITE); // Clear area for game over display
     
     char buffer[64];
-    sprintf(buffer, "Score: %05d", final_score);
-    LCD_DrawString(80, 120, RED, WHITE, "Game Over!", 16, 0);
-    LCD_DrawString(73, 140, BLACK, WHITE, buffer, 16, 0);
-    LCD_DrawString(77, 190, BLACK, WHITE, "Play Again?", 16, 0);
-    LCD_DrawString(82, 210, BLACK, WHITE, "Main Menu", 16, 0);
+    sprintf(buffer, "%05d", final_score);
+    Picture pic;
+    pic.width = 140;
+    pic.height = 130;
+    pic.pixel_data = (unsigned char*)game_over_map; // This is the array from game_over.c
+    LCD_DrawPicture(50, 100, &pic);
+    LCD_DrawString(119, 164, BLACK, WHITE, buffer, 16, 0);
+    // LCD_DrawString(80, 120, RED, WHITE, "Game Over!", 16, 0);
+    // LCD_DrawString(77, 190, BLACK, WHITE, "Play Again?", 16, 0);
+    // LCD_DrawString(82, 210, BLACK, WHITE, "Main Menu", 16, 0);
     
     if (final_score > highscore)
     {
@@ -285,7 +298,12 @@ void game_over_display(int final_score)
 void pause_game_display()
 {
     LCD_DrawFillRectangle(65, 120, 175, 205, WHITE); // Clear area for pause menu
-    LCD_DrawString(75, 130, BLACK, WHITE, "Game Paused", 16, 0);
-    LCD_DrawString(105, 165, BLACK, WHITE, "Play", 16, 0);
-    LCD_DrawString(85, 185, BLACK, WHITE, "Main Menu", 16, 0);
+    // LCD_DrawString(75, 130, BLACK, WHITE, "Game Paused", 16, 0);
+    // LCD_DrawString(105, 165, BLACK, WHITE, "Play", 16, 0);
+    // LCD_DrawString(85, 185, BLACK, WHITE, "Main Menu", 16, 0);
+    Picture pic;
+    pic.width = 110;
+    pic.height = 85;
+    pic.pixel_data = (unsigned char*)game_paused_map; // This is the array from main_menu.c
+    LCD_DrawPicture(65, 120, &pic);
 }
