@@ -12,7 +12,6 @@
 #include "sound.h"
 #include "ff.h"
 #include "hardware/uart.h"
-#include "file.h"
 
 // UART function declarations (since no uart.h)
 extern void init_uart(void);
@@ -20,6 +19,8 @@ extern void init_uart_irq(void);
 extern void command_shell(void);
 extern void init_sdcard_io(void);
 extern void set_fattime(int year, int month, int day, int hour, int min, int sec);
+
+extern FRESULT leaderboard_submit_score(const char *username, int score, bool *made_top10);
 
 // ── Direction codes (passed through inter-core FIFO) ──────────
 
@@ -32,7 +33,10 @@ extern void set_fattime(int year, int month, int day, int hour, int min, int sec
 // -- globals --
 int highscore = 0;
 int curr_score = 0;
+char player_username[10] = "";
 volatile GameState current_state = STATE_MAIN_MENU;
+bool score_saved_this_round = false;
+static FATFS fs;
 
 // Character position
 int player_x = 120, player_y = 310; // Start at bottom center of 240 x 320 screen
@@ -66,6 +70,7 @@ void core1_entry(void) {
 
 void start_game_logic() {
     curr_score = 0;
+    score_saved_this_round = false;
     player_x = 120;
     player_y = 310;
     for (int i = 0; i < MAX_ROWS; i++) {
@@ -106,6 +111,27 @@ void move_character(uint32_t dir) {
     LCD_DrawFillRectangle(player_x, player_y, player_x + player_size, player_y + player_size, player_color);
 }
 
+void handle_game_over(void) {
+    bool made_top10 = false;
+    FRESULT fr;
+
+    printf("[INFO] Game over. Final score = %d\n", curr_score);
+
+    if (curr_score > highscore) {
+        highscore = curr_score;
+    }
+
+    fr = leaderboard_submit_score(player_username, curr_score, &made_top10);
+
+    if (fr != FR_OK) {
+        printf("[ERROR] Failed to save score. FATFS error = %d\n", fr);
+    } else if (made_top10) {
+        printf("[INFO] New high score added to leaderboard.\n");
+    } else {
+        printf("[INFO] Score did not make leaderboard.\n");
+    }
+}
+
 // ── Core 0 — game loop ────────────────────────────────────────
 int main(void) {
     stdio_init_all();
@@ -114,12 +140,31 @@ int main(void) {
     init_uart_irq();
     sleep_ms(250);
 
+    printf("Enter username: ");
+    fflush(stdout);
+
+    if (fgets(player_username, sizeof(player_username), stdin) == NULL) {
+        strcpy(player_username, "Player");
+    }
+
+    size_t len = strlen(player_username);
+    while (len > 0 && (player_username[len - 1] == '\n' || player_username[len - 1] == '\r')) {
+        player_username[len - 1] = '\0';
+        len--;
+    }
+
+if (player_username[0] == '\0') {
+    strcpy(player_username, "Player");
+}
+
     while (uart_is_readable(uart0)) {
         uart_getc(uart0);
     }
     set_fattime(2026, 4, 17, 12, 0, 0);
     init_sdcard_io();
-    command_shell();
+    FRESULT fr = f_mount(&fs, "0:", 1);
+    printf("[INFO] f_mount result = %d\n", fr);
+    //command_shell();
 
     if (!apds_init()) {
         printf("[FAIL]  Sensor init failed. Halting.\n");
@@ -127,9 +172,9 @@ int main(void) {
     }
 
     multicore_launch_core1(core1_entry);
-    printf("[INFO]  Game loop running on core %d\n", get_core_num());
-    printf("[INFO]  Core 1 launched — gesture detection running\n");
-    printf("[READY] Swipe your hand over the sensor...\n\n");
+    // printf("[INFO]  Game loop running on core %d\n", get_core_num());
+    // printf("[INFO]  Core 1 launched — gesture detection running\n");
+    // printf("[READY] Swipe your hand over the sensor...\n\n");
 
     init_spi_lcd();
     init_buttons();
@@ -146,10 +191,10 @@ int main(void) {
         if (multicore_fifo_rvalid()) {
             uint32_t dir = multicore_fifo_pop_blocking();
             switch (dir) {
-                case DIR_UP:    printf(">>> GESTURE: UP\n\n");    break;
-                case DIR_DOWN:  printf(">>> GESTURE: DOWN\n\n");  break;
-                case DIR_LEFT:  printf(">>> GESTURE: LEFT\n\n");  break;
-                case DIR_RIGHT: printf(">>> GESTURE: RIGHT\n\n"); break;
+                case DIR_UP:   break;
+                case DIR_DOWN: break;
+                case DIR_LEFT: break;
+                case DIR_RIGHT: break;
             }
 
             if (current_state == STATE_PLAYING) {
@@ -184,6 +229,10 @@ int main(void) {
                 case STATE_GAME_OVER:
                     sound_play_death();
                     game_over_display(curr_score);
+                    if (!score_saved_this_round) {
+                        handle_game_over();
+                        score_saved_this_round = true;
+                    }
                     break;
             }
             last_state = current_state;
