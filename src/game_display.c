@@ -193,7 +193,7 @@ void redraw_rows()
                         (u16)rows[i].y,
                         rows[i].obstacles[col].x + rows[i].obstacles[col].width,
                         (u16)(rows[i].y + ROW_H),
-                        YELLOW
+                        GRAY
                     );
                 }
             }
@@ -224,8 +224,9 @@ void main_menu_display(int highscore)
 
     if (leaderboard_count > 0) { 
         for (int i = 0; i < leaderboard_count; i++) {
-            sprintf(buffer1, "%d", leaderboard[i].username);
-            sprintf(buffer2, "-- %5d", i + 1, leaderboard[i].score);
+            printf("Leaderboard entry %d: %s -- %d\n", i + 1, leaderboard[i].username, leaderboard[i].score);
+            sprintf(buffer1, "%s", leaderboard[i].username);
+            sprintf(buffer2, "-- %d", leaderboard[i].score);
             LCD_DrawString(60, 128 + i * 30, BLACK, WHITE, buffer1, 16, 0);
             LCD_DrawString(145, 128 + i * 30, BLACK, WHITE, buffer2, 16, 0);
         }
@@ -270,7 +271,7 @@ void play_game_display() {
         last_scroll = now;
         curr_score++;
         // Difficulty scaling
-        if (curr_score % 100 == 0)
+        if (curr_score % 30 == 0)
         {
             scroll_step = scroll_step + (scroll_step / 10);
             spawn_rate = spawn_rate - (spawn_rate / 10);

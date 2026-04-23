@@ -22,6 +22,8 @@ extern void set_fattime(int year, int month, int day, int hour, int min, int sec
 
 // ── Direction codes (passed through inter-core FIFO) ──────────
 
+extern FRESULT leaderboard_submit_score(const char *username, int score, bool *made_top10);
+
 // ── Direction codes (passed through inter-core FIFO) ──────────
 #define DIR_UP    1
 #define DIR_DOWN  2
@@ -42,8 +44,8 @@ const int move_step = 20; // Note: Decrement `player_y` to move upward (toward t
 
 // Character attributes
 const int player_size = 10;
-const uint16_t player_color = GREEN;
-const uint16_t bg_color = WHITE;
+const uint16_t player_color = CHAR_COLOR;
+const uint16_t bg_color = GRASS;
 
 static uint32_t gesture_to_int(const char *g) {
     if (g[0] == 'U') return DIR_UP;
@@ -75,7 +77,7 @@ void start_game_logic() {
         rows[i].active = false;
     }
 
-    LCD_Clear(WHITE); 
+    LCD_Clear(GRASS); 
     generate_row();
     redraw_rows();
     scroll_step = 5; // Global variable for scroll step, can be adjusted for difficulty
@@ -162,7 +164,7 @@ if (player_username[0] == '\0') {
     init_sdcard_io();
     FRESULT fr = f_mount(&fs, "0:", 1);
     printf("[INFO] f_mount result = %d\n", fr);
-    //command_shell();
+    // command_shell();
 
     if (!apds_init()) {
         printf("[FAIL]  Sensor init failed. Halting.\n");
@@ -177,7 +179,7 @@ if (player_username[0] == '\0') {
     init_spi_lcd();
     init_buttons();
     LCD_Setup();
-    LCD_Clear(WHITE);
+    LCD_Clear(GRASS);
     sound_init();
 
     srand(time_us_32());
@@ -211,7 +213,7 @@ if (player_username[0] == '\0') {
 
                 case STATE_PLAYING:
                     if (last_state == STATE_PAUSED) {
-                        LCD_Clear(WHITE);
+                        LCD_Clear(GRASS);
                         redraw_rows();
                         show_score(curr_score);
                     } else { // Fresh start

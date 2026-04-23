@@ -16,7 +16,7 @@ extern int leaderboard_count;
 
 FRESULT leaderboard_load(void);
 FRESULT leaderboard_save(void);
-FRESULT leaderboard_submit_score(int score, bool *made_top10);
+FRESULT leaderboard_submit_score(const char *username, int score, bool *made_top10);
 bool leaderboard_add_or_update(const char *username, int new_score);
 void leaderboard_print(void);
 void test_leaderboard(int argc, char *argv[]);
