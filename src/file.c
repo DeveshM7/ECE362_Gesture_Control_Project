@@ -5,13 +5,20 @@
 #include <ctype.h>
 #include "ff.h"
 #include "diskio.h"
-#include "file.h"
+#include "pico/stdlib.h"
 
 #define LEADERBOARD_FILE   "0:/scores.csv"
+#define MAX_ENTRIES        10
+#define MAX_USERNAME_LEN   20
 #define LINE_BUF_LEN       128
 
-ScoreEntry leaderboard[MAX_ENTRIES];
-int leaderboard_count = 0;
+typedef struct {
+    char username[MAX_USERNAME_LEN + 1];
+    int score;
+} ScoreEntry;
+
+static ScoreEntry leaderboard[MAX_ENTRIES];
+static int leaderboard_count = 0;
 
 static void trim_newline(char *s) {
     if (s == NULL) {
@@ -223,16 +230,6 @@ bool leaderboard_add_or_update(const char *username, int new_score) {
         return false;
     }
 
-    int existing_idx = find_existing_user(username);
-    if (existing_idx >= 0) {
-        if (new_score <= leaderboard[existing_idx].score) {
-            return false;
-        }
-        leaderboard[existing_idx].score = new_score;
-        sort_leaderboard();
-        return true;
-    }
-
     if (!score_qualifies(new_score)) {
         return false;
     }
@@ -264,14 +261,20 @@ void leaderboard_print(void) {
     }
 }
 
-FRESULT leaderboard_submit_score(int score, bool *made_top10) {
-    FIL file;
+FRESULT leaderboard_submit_score(const char *username, int score, bool *made_top10) {
     FRESULT fr;
-    char username[MAX_USERNAME_LEN + 1];
+    char username_buf[MAX_USERNAME_LEN + 1];
 
     if (made_top10 != NULL) {
         *made_top10 = false;
     }
+
+    if (username == NULL) {
+        return FR_INVALID_NAME;
+    }
+
+    strncpy(username_buf, username, MAX_USERNAME_LEN);
+    username_buf[MAX_USERNAME_LEN] = '\0';
 
     fr = leaderboard_load();
     if (fr != FR_OK) {
@@ -283,21 +286,12 @@ FRESULT leaderboard_submit_score(int score, bool *made_top10) {
         return FR_OK;
     }
 
-    printf("Enter username for score %d: ", score);
-    if (f_gets(username, sizeof(username), &file) != NULL) {
-        // unreachable path kept out intentionally
-    }
-
-    if (fgets(username, sizeof(username), stdin) == NULL) {
-        return FR_INT_ERR;
-    }
-
-    sanitize_username(username);
-    if (username[0] == '\0') {
+    sanitize_username(username_buf);
+    if (username_buf[0] == '\0') {
         return FR_INVALID_NAME;
     }
 
-    if (!leaderboard_add_or_update(username, score)) {
+    if (!leaderboard_add_or_update(username_buf, score)) {
         printf("Score was not added. Existing score may already be higher.\n");
         return FR_OK;
     }
