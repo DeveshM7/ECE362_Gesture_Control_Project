@@ -153,7 +153,7 @@ void move_rows_down()
     {
         if (rows[i].active && rows[i].y >= 0)
         {
-            LCD_DrawFillRectangle(0, (u16)rows[i].y, LCD_W, (u16)(rows[i].y + ROW_H), WHITE); // Erase with background color
+            LCD_DrawFillRectangle(0, (u16)rows[i].y, LCD_W, (u16)(rows[i].y + ROW_H), GRASS); // Erase with background color
         }
     }
 
@@ -207,7 +207,7 @@ void show_score(int score)
 {    
     char buffer[20];
     sprintf(buffer, "Score: %05d", score);
-    LCD_DrawString(1, 0, BLACK, WHITE, buffer, 12, 0);
+    LCD_DrawString(1, 0, BLACK, GRASS, buffer, 12, 0);
 }
 
 void main_menu_display(int highscore)
