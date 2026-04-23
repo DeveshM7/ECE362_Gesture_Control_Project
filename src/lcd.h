@@ -66,6 +66,8 @@ extern lcd_dev_t lcddev;
 #define LGRAY       0XC618
 #define LGRAYBLUE   0XA651
 #define LBBLUE      0X2B12
+#define GRASS       0x86D3
+#define CHAR_COLOR  0xde25
 
 void LCD_Setup(void);
 void LCD_Init(void (*reset)(int), void (*select)(int), void (*reg_select)(int));
