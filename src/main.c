@@ -20,8 +20,6 @@ extern void command_shell(void);
 extern void init_sdcard_io(void);
 extern void set_fattime(int year, int month, int day, int hour, int min, int sec);
 
-extern FRESULT leaderboard_submit_score(const char *username, int score, bool *made_top10);
-
 // ── Direction codes (passed through inter-core FIFO) ──────────
 
 // ── Direction codes (passed through inter-core FIFO) ──────────
